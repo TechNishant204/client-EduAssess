@@ -17,7 +17,7 @@ const Result = () => {
       try {
         setLoading(true);
         const response = await resultService.getResultById(resultId);
-        console.log("Result.jsx  getResultById data:", response.data);
+        // console.log("Result.jsx  getResultById data:", response.data);
         setResult(response.data);
       } catch (err) {
         setError("Failed to load result.");

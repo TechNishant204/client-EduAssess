@@ -143,7 +143,7 @@ const CompletedExams = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center text-center">
                 <Link
                   to={`/student/results/${result._id}`}
                   className="inline-block w-full sm:w-auto px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors duration-200 text-sm font-medium"

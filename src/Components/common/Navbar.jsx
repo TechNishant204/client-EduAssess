@@ -1,29 +1,38 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Logo from "../../assets/images/logo1.png";
-import UserLogo from "../../assets/images/user.png"; // Placeholder for user logo
-import { HiMenu } from "react-icons/hi";
-import { HiX } from "react-icons/hi";
+import UserLogo from "../../assets/images/user.png";
+import { HiMenu, HiX } from "react-icons/hi";
 
 const Navbar = ({ onLogout }) => {
   const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef(null);
+  const desktopMenuRef = useRef(null); // Ref for desktop user menu
+  const mobileMenuRef = useRef(null); // Ref for mobile menu
 
-  // when the user click outside the menu, close the menu
+  // Handle clicks/touches outside the menu
   const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
+    if (
+      desktopMenuRef.current &&
+      !desktopMenuRef.current.contains(event.target) &&
+      mobileMenuRef.current &&
+      !mobileMenuRef.current.contains(event.target)
+    ) {
       setIsOpen(false);
     }
   };
 
   useEffect(() => {
+    // Add listeners for both mouse and touch events
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
-  // Role-based dashboard link
   const getDashboardLink = () => {
     if (!currentUser) return "/";
     if (currentUser.role === "admin") return "/admin/dashboard";
@@ -31,7 +40,6 @@ const Navbar = ({ onLogout }) => {
     return "/";
   };
 
-  // Role-based dashboard label
   const getDashboardLabel = () => {
     if (!currentUser) return "";
     if (currentUser.role === "admin") return "Admin Dashboard";
@@ -40,7 +48,7 @@ const Navbar = ({ onLogout }) => {
   };
 
   const UserMenu = () => (
-    <div className="relative ml-3" ref={menuRef}>
+    <div className="relative ml-3" ref={desktopMenuRef}>
       <div className="flex items-center">
         <Link
           to={getDashboardLink()}
@@ -112,35 +120,32 @@ const Navbar = ({ onLogout }) => {
     <nav className="bg-stone-100 shadow-gray-300 drop-shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo section */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img className="h-8 w-auto" src={Logo} alt="EduAssess" />
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <div className="flex items-center sm:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-orange-600"
             >
               <span className="sr-only">Open main menu</span>
-              {/* Hamburger icon */}
               <HiMenu className={`${isOpen ? "hidden" : "block"} h-6 w-6`} />
-              {/* Close icon */}
               <HiX className={`${isOpen ? "block" : "hidden"} h-6 w-6`} />
             </button>
           </div>
 
-          {/* Desktop menu */}
           <div className="hidden sm:flex sm:items-center">
             {currentUser ? <UserMenu /> : <GuestMenu />}
           </div>
         </div>
 
-        {/* Mobile menu */}
-        <div className={`${isOpen ? "block" : "hidden"} sm:hidden pb-4`}>
+        <div
+          className={`${isOpen ? "block" : "hidden"} sm:hidden pb-4`}
+          ref={mobileMenuRef}
+        >
           {currentUser ? (
             <div className="pt-2 pb-3 space-y-1">
               <Link
@@ -162,6 +167,7 @@ const Navbar = ({ onLogout }) => {
                   onLogout();
                   setIsOpen(false);
                 }}
+                type="button"
                 className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600"
               >
                 Sign out
