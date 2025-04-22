@@ -9,36 +9,36 @@ const HomePage = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <div className="relative bg-gradient-to-r from-slate-100 to-orange-100 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-10">
-                <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-orange-500 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+              <div className="space-y-6 md:space-y-10 text-center lg:text-left">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-orange-500 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text">
                   Transform Your Skills into Success
                 </h1>
-                <p className="text-md md:text-lg text-blue-950 max-w-lg">
+                <p className="text-sm sm:text-md md:text-lg text-gray-600 max-w-lg mx-auto lg:mx-0">
                   Experience next-gen assessment technology that adapts to your
                   journey. Smart. Seamless. Future-ready.
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 lg:space-x-2 justify-center lg:justify-start">
                   <Link
                     to="/signup"
-                    className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                    className="inline-flex w-1/2 mx-auto items-center justify-center px-6 sm:px-4 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-sm sm:text-base"
                   >
                     Launch Your Journey
                   </Link>
                   <Link
                     to="/login"
-                    className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-medium rounded-full border-2 border-orange-500 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-orange-50"
+                    className="inline-flex w-1/3 mx-auto items-center justify-center px-6 sm:px-4 py-3 sm:py-1 bg-white text-orange-600 font-medium rounded-full border-2 border-orange-500 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-orange-50 text-md sm:text-sm"
                   >
                     Join US
                   </Link>
                 </div>
               </div>
-              <div className="relative">
+              <div className="relative mt-8 lg:mt-0">
                 <img
                   src={pic}
                   alt="Online Assessment Illustration"
-                  className="w-full h-auto rounded-full transform hover:scale-125 border-0 shadow-md hover:shadow-lg transition-all duration-300"
+                  className="w-full max-w-md mx-auto lg:max-w-none h-auto rounded-full transform hover:scale-105 border-0 shadow-md hover:shadow-lg transition-all duration-300"
                 />
               </div>
             </div>

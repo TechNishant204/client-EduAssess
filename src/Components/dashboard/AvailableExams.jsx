@@ -108,7 +108,7 @@ const AvailableExams = ({ onEnrollSuccess }) => {
               <p className="text-gray-500 text-sm mb-2">{exam.description}</p>
               <button
                 onClick={() => handleEnroll(exam._id)}
-                className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition"
+                className="w-full sm:w-auto my-2 sm:my-4 px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base bg-orange-500 text-white rounded-full hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
               >
                 Enroll
               </button>

@@ -85,20 +85,20 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-[95%] sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">
           {initialData ? "Update Exam" : "Create Exam"}
         </h2>
 
         {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Title
             </label>
@@ -107,12 +107,12 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
+              className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
               required
             />
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Description
             </label>
@@ -120,28 +120,45 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
+              className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
               rows="3"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Duration (minutes)
-            </label>
-            <input
-              type="number"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
-              min="1"
-              required
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Duration (minutes)
+              </label>
+              <input
+                type="number"
+                name="duration"
+                value={formData.duration}
+                onChange={handleChange}
+                className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
+                min="1"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Total Marks
+              </label>
+              <input
+                type="number"
+                name="totalMarks"
+                value={formData.totalMarks}
+                onChange={handleChange}
+                className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
+                min="1"
+                required
+              />
+            </div>
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Start Time
             </label>
@@ -150,12 +167,12 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               name="startTime"
               value={formData.startTime}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
+              className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
               required
             />
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               End Time
             </label>
@@ -164,27 +181,12 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               name="endTime"
               value={formData.endTime}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
+              className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Total Marks
-            </label>
-            <input
-              type="number"
-              name="totalMarks"
-              value={formData.totalMarks}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
-              min="1"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Passing Marks
             </label>
@@ -193,7 +195,7 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               name="passingMarks"
               value={formData.passingMarks}
               onChange={handleChange}
-              className="w-full p-2 border rounded-lg mt-1"
+              className="w-full p-2 text-sm sm:text-base border rounded-lg mt-1"
               min="1"
               required
             />
@@ -203,14 +205,14 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-gray-200 rounded-lg hover:bg-gray-300 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
             >
               {loading ? "Processing..." : "Next"}
             </button>

@@ -71,28 +71,31 @@ const Result = () => {
           </div>
 
           {/* User Info & Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg flex items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+            {" "}
+            {/* Adjusted grid columns */}
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg flex items-center">
               <div className="bg-orange-100 p-2 rounded-full mr-2">
-                <FiUser className="h-6 w-6 text-orange-600" />
+                <FiUser className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
               </div>
               <div>
-                <div className="font-medium">{result.student.name}</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-sm sm:text-base">
+                  {result.student.name}
+                </div>
+                <div className="text-xs sm:text-sm text-gray-500">
                   {result.student.email}
                 </div>
               </div>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg flex items-center">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg flex items-center">
               <div className="bg-orange-100 p-2 rounded-full mr-3">
-                <FiCheckCircle className="h-6 w-6 text-orange-600" />
+                <FiCheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
               </div>
               <div>
-                <div className="font-medium">
+                <div className="font-medium text-sm sm:text-base">
                   {result.totalScore} / {result.exam.totalMarks}
                 </div>
-                <div className="text-sm text-gray-500">Score</div>
+                <div className="text-xs sm:text-sm text-gray-500">Score</div>
               </div>
             </div>
           </div>
@@ -110,24 +113,28 @@ const Result = () => {
           </div>
 
           {/* Questions Table Header */}
-          <div className="grid grid-cols-12 bg-gray-50 py-3 px-4 rounded-t-lg font-medium text-gray-700">
+          <div className="grid grid-cols-12 bg-gray-50 py-2 sm:py-3 px-2 sm:px-4 rounded-t-lg font-medium text-gray-700 text-xs sm:text-sm">
+            {" "}
             <div className="col-span-6">Questions</div>
-            <div className="col-span-2">Difficulty</div>
-            <div className="col-span-2">Result</div>
-            <div className="col-span-2">Score</div>
+            <div className="col-span-2 hidden sm:block">Difficulty</div>{" "}
+            {/* Hide on mobile */}
+            <div className="col-span-3 sm:col-span-2">Result</div>
+            <div className="col-span-3 sm:col-span-2">Score</div>
           </div>
 
           {/* Questions List */}
           <div className="divide-y">
             {result.answers.map((answer, index) => (
               <div key={answer._id} className="hover:bg-gray-50">
-                <div className="grid grid-cols-12 py-4 px-4 items-center">
+                <div className="grid grid-cols-12 py-2 sm:py-4 px-2 sm:px-4 items-center text-xs sm:text-sm">
+                  {" "}
+                  {/* Adjusted text size and spacing */}
                   <div className="col-span-6">
                     <button className="flex items-center text-left">
                       <span className="mr-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
+                          className="h-3 w-3 sm:h-4 sm:w-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -140,12 +147,17 @@ const Result = () => {
                           />
                         </svg>
                       </span>
-                      {answer.question.text}
+                      <span className="line-clamp-2 sm:line-clamp-1">
+                        {answer.question.text}
+                      </span>{" "}
+                      {/* Added text truncation */}
                     </button>
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 hidden sm:block">
+                    {" "}
+                    {/* Hide on mobile */}
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
                         answer.question.difficulty === "easy"
                           ? "bg-green-100 text-green-800"
                           : answer.question.difficulty === "medium"
@@ -190,7 +202,7 @@ const Result = () => {
                       </span>
                     )}
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 hidden md:block">
                     {answer.isCorrect ? (
                       <span className="text-green-600">
                         {answer.question.marks}/{answer.question.marks}
@@ -204,9 +216,11 @@ const Result = () => {
                 </div>
 
                 {/* Expanded Answer Details */}
-                <div className="bg-gray-50 px-10 py-4 border-t border-gray-100">
+                <div className="bg-gray-50 px-3 sm:px-10 py-3 sm:py-4 border-t border-gray-100">
                   <div className="mb-4">
-                    <h4 className="font-medium text-gray-700 mb-2">Options:</h4>
+                    <h4 className="font-medium text-gray-700 mb-2 text-sm sm:text-base">
+                      Options:
+                    </h4>
                     <div className="space-y-2">
                       {answer.question.options.map((option, idx) => {
                         const isCorrectOption =
@@ -284,7 +298,6 @@ const Result = () => {
                         Correct Answer:
                       </h4>
                       <div className="p-2 bg-green-100 border border-green-300 rounded-md text-green-800">
-                        {/* Replace with actual correct answer from your data */}
                         {answer.question.options.find((opt, idx) => idx === 1)}{" "}
                         {/* This is just a placeholder */}
                       </div>
@@ -294,42 +307,6 @@ const Result = () => {
               </div>
             ))}
           </div>
-
-          {/* Proctor Flags */}
-          {/* {result.proctorFlags && result.proctorFlags.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-medium text-gray-800 mb-3">
-                Proctor Flags
-              </h3>
-              <div className="bg-red-50 p-4 rounded-lg">
-                <ul className="space-y-2">
-                  {result.proctorFlags.map((flag, index) => (
-                    <li key={index} className="flex items-center text-red-700">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                      <span className="font-medium mr-2">{flag.type}:</span>
-                      <span>{flag.description}</span>
-                      <span className="ml-auto text-sm text-gray-500">
-                        {new Date(flag.timestamp).toLocaleTimeString()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )} */}
         </div>
       </main>
     </div>

@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     // Remove auth header
-    delete api.defaults.headers.Authorization;
+    delete api.defaults.headers.Authorization; // delete the token from the header
     setCurrentUser(null);
   };
 
