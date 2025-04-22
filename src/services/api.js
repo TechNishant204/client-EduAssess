@@ -17,7 +17,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem("token");
 
     // If a token exists, it is added to the Authorization header with the Bearer scheme,
-    // a common convention for JWT (JSON Web Token) authentication.
+    
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }

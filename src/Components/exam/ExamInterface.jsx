@@ -1,214 +1,198 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useExam } from "../../hooks/useExam"; // We'll still use this for the startExam function
+import { useEffect, useState, useCallback } from "react";
+import { useExam } from "../../hooks/useExam";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProctorManager from "./ProctorManager";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const ExamInterface = () => {
-  console.log("Interface page loaded");
   const { examId } = useParams();
   const navigate = useNavigate();
-  const { startExam, submitExam } = useExam(); // We only need these functions from useExam
 
-  // Local state management
-  const [exam, setExam] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [isExamStarted, setIsExamStarted] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // Get exam functions and state from custom hook
+  const {
+    loading,
+    exam,
+    questions,
+    answers,
+    timeLeft,
+    setAnswers,
+    setTimeLeft,
+    startExam,
+    submitExam,
+  } = useExam();
 
+  // Local state
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [examStarted, setExamStarted] = useState(false);
+
+  // Initialize exam
   useEffect(() => {
-    // console.log("useEffect triggered");
-    const initializeExam = async () => {
-      console.log("Starting exam with examId:", examId);
+    const initExam = async () => {
       try {
-        setLoading(true);
-        const examData = await startExam(examId);
-        console.log("Exam data received:", examData);
-
-        // Extract the data from the response
-        const { data } = examData;
-
-        // Set all the local state from the API response
-        setExam({
-          title: data.title,
-          totalMarks: data.totalMarks,
-          startTime: data.startTime,
-          examId: data.examId,
-        });
-
-        setQuestions(data.questions || []);
-        setTimeLeft(data.duration || 60); // Default to 60 seconds if not provided
-        setIsExamStarted(true);
-
-        // console.log("Questions set:", data.questions);
-        // console.log("Time left set to:", data.duration);
+        console.log("from exam interface", examId);
+        await startExam(examId);
+        setExamStarted(true);
       } catch (error) {
-        console.error("Error starting exam:", error);
-        toast.error("Failed to start exam", { autoClose: 3000 });
-      } finally {
-        setLoading(false);
+        // Error is handled in useExam hook
+        setTimeout(() => {
+          navigate("/student/dashboard");
+        }, 3000);
       }
     };
 
-    if (!isExamStarted) initializeExam();
-  }, [examId, startExam, isExamStarted]);
+    initExam();
+  }, [examId, startExam, navigate]);
 
-  // Timer effect to handle countdown
+  // Timer effect
   useEffect(() => {
-    // console.log("Timer useEffect triggered, timeLeft:", timeLeft);
-    let timer;
-    if (isExamStarted && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(timer);
-            handleSubmit();
-            toast.info("Exam ended due to time limit!", { autoClose: 3000 });
-            navigate("/student/dashboard");
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    } else if (isExamStarted && timeLeft === 0) {
-      handleSubmit();
-      toast.info("Exam ended due to time limit!", { autoClose: 3000 });
-      navigate("/student/dashboard");
-    }
-    return () => clearInterval(timer); // Cleanup on unmount or dependency change
-  }, [isExamStarted, timeLeft, navigate]);
+    if (!examStarted || isSubmitting || timeLeft <= 0) return;
 
-  // Debug logging effect
-  useEffect(() => {
-    console.log("Current questions:", questions);
-    console.log("Current exam:", exam);
-  }, [questions, exam]);
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
 
-  const handleAnswerChange = (option) => {
-    setAnswers({ ...answers, [currentQuestion]: option });
-  };
+    return () => clearInterval(timer);
+  }, [examStarted, isSubmitting, timeLeft, setTimeLeft]);
 
+  // Handle question navigation
   const handleNext = () => {
-    if (currentQuestion < questions.length - 1)
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
+    }
   };
 
   const handlePrevious = () => {
-    if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
   };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     await submitExam(examId, Object.values(answers), []);
-  //     toast.success("Exam submitted successfully!", { autoClose: 3000 });
-  //     navigate("/student/dashboard");
-  //   } catch (error) {
-  //     console.error("Error submitting exam:", error);
-  //     toast.error("Error submitting exam", { autoClose: 3000 });
-  //   }
-  // };
-  const handleSubmit = async () => {
-    console.log("submit button clicked");
-    console.log("user answers", answers);
-    try {
-      //   // Wait for successful submission
-      setTimeLeft(0); // Stop the timer
-      setIsExamStarted(false); // Mark the exam as not started anymore
-      const response = await submitExam(examId, Object.values(answers), []);
-      console.log("Submission response:", response); //   // Show success message
-      toast.success("Exam submitted successfully!", { autoClose: 3000 });
+  // Handle answer selection
+  const handleAnswerChange = (option) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion]: option,
+    }));
+  };
 
-      //   // Ensure navigation happens after toast appears
+  // Handle exam submission
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Format answers for submission
+      const formattedAnswers = Object.keys(answers).map((index) => ({
+        question: questions[parseInt(index)]._id,
+        selectedOption: answers[index],
+      }));
+
+      // Submit the exam
+      await submitExam(examId, formattedAnswers);
+
+      toast.success("Exam submitted successfully!");
+
+      // Navigate after toast shows
       setTimeout(() => {
         navigate("/student/dashboard");
-      }, 500);
+      }, 1500);
     } catch (error) {
-      console.error("Error submitting exam:", error);
-      toast.error(`Error submitting exam: ${error.message}`, {
-        autoClose: 3000,
-      });
+      // Error is handled in useExam hook
+      setIsSubmitting(false);
     }
-    // navigate("/student/dashboard");
-  };
+  }, [isSubmitting, answers, questions, submitExam, examId, navigate]);
 
-  if (loading || !exam || !questions.length || !isExamStarted)
+  // Show loading state
+  if (loading || !exam || !questions.length) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="p-6 flex items-center space-x-4 bg-white rounded-lg shadow-lg">
-          <div className="animate-spin h-8 w-8 text-orange-500">
-            <svg className="w-full h-full" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+        <div className="p-6 bg-white rounded-lg shadow-lg text-center">
+          <div className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4">
+            <AiOutlineLoading className="animate-spin w-full h-full text-current" />
           </div>
-          <span className="text-lg font-medium text-gray-700">
+          <p className="text-lg font-medium text-gray-700">
             Preparing your exam...
-          </span>
+          </p>
         </div>
       </div>
     );
+  }
 
-  const question = questions[currentQuestion];
+  // Format time display
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
+  // Get current question
+  const currentQuestionData = questions[currentQuestion];
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <ToastContainer position="top-right" />
+
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-orange-600">{exam.title}</h1>
-          <div className="bg-white px-6 py-3 rounded-full shadow-md">
+        {/* Header with timer */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-orange-600 mb-3 md:mb-0">
+            {exam?.title || "Exam"}
+          </h1>
+          <div className="bg-white px-4 py-2 rounded-full shadow-md">
             <span className="text-lg font-semibold text-gray-700">
               Time Left: {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
             </span>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Question {currentQuestion + 1} of {questions.length}
-            </h2>
-            <div className="mt-2 text-lg text-gray-700">
-              {question.text}{" "}
+        {/* Question card */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          {/* Question header */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Question {currentQuestion + 1} of {questions.length}
+              </h2>
               <span className="text-orange-500 font-medium">
-                ({question.marks} marks)
+                ({currentQuestionData?.marks || 0} marks)
               </span>
             </div>
+            <p className="text-lg text-gray-700">{currentQuestionData?.text}</p>
           </div>
 
-          {question.type === "multiple-choice" && (
-            <div className="space-y-4">
-              {question.options.map((option, index) => (
+          {/* Answer options */}
+          {currentQuestionData?.type === "multiple-choice" && (
+            <div className="space-y-3 mb-8">
+              {currentQuestionData.options.map((option, index) => (
                 <div
                   key={index}
-                  className="flex items-center p-3 hover:bg-orange-50 rounded-lg transition-colors"
+                  className={`flex items-center p-3 rounded-lg transition-colors ${
+                    answers[currentQuestion] === option
+                      ? "bg-orange-50 border border-orange-200"
+                      : "hover:bg-gray-50"
+                  }`}
                 >
                   <input
                     type="radio"
-                    name="answer"
+                    id={`option-${index}`}
+                    name={`question-${currentQuestion}`}
                     value={option}
                     checked={answers[currentQuestion] === option}
                     onChange={() => handleAnswerChange(option)}
+                    disabled={isSubmitting}
                     className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                   />
-                  <label className="ml-3 text-gray-700 cursor-pointer">
+                  <label
+                    htmlFor={`option-${index}`}
+                    className="ml-3 flex-grow text-gray-700 cursor-pointer"
+                  >
                     {option}
                   </label>
                 </div>
@@ -216,32 +200,64 @@ const ExamInterface = () => {
             </div>
           )}
 
+          {/* Navigation buttons */}
           <div className="mt-8 flex justify-between items-center">
             <button
               onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className="px-6 py-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={currentQuestion === 0 || isSubmitting}
+              className="px-5 py-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             <button
               onClick={handleSubmit}
-              className="px-8 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transform hover:scale-105 transition-all duration-200"
+              disabled={isSubmitting}
+              className="px-8 py-3 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center"
             >
-              Submit Exam
+              {isSubmitting ? (
+                <>
+                  <AiOutlineLoading className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Exam"
+              )}
             </button>
             <button
               onClick={handleNext}
-              disabled={currentQuestion === questions.length - 1}
-              className="px-6 py-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={
+                currentQuestion === questions.length - 1 || isSubmitting
+              }
+              className="px-5 py-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
           </div>
         </div>
 
-        <div className="mt-6">
-          <ProctorManager examId={examId} />
+        {/* Question navigator */}
+        <div className="mt-6 bg-white rounded-xl p-4 shadow-md">
+          <h3 className="text-lg font-medium text-gray-700 mb-3">
+            Question Navigator
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {questions.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentQuestion(index)}
+                disabled={isSubmitting}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  currentQuestion === index
+                    ? "bg-orange-500 text-white"
+                    : answers[index]
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

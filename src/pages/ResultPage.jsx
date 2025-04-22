@@ -7,7 +7,7 @@ const ResultPage = () => {
   return (
     <div className="result-page-container">
       <h1 className="text-3xl font-bold mb-4">Exam Results</h1>
-      <Outlet />
+      <Outlet /> // This will render the nested routes defined in the router
     </div>
   );
 };

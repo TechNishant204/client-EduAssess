@@ -4,20 +4,19 @@ import { useAuth } from "../../hooks/useAuth";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const AvailableExams = () => {
+const AvailableExams = ({ onEnrollSuccess }) => {
   const { currentUser } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("Available Exams Rendered");
-  console.log("currentUser", currentUser);
+
   useEffect(() => {
     const fetchExams = async () => {
       if (currentUser?.id) {
-        console.log("Fetching available exams for user:", currentUser._id);
+        console.log("Fetching available exams for user:", currentUser.id);
         try {
           setLoading(true);
-          const response = await examService.getAvailableExams(currentUser._id);
+          const response = await examService.getAvailableExams(currentUser.id);
           setExams(response.data || []);
         } catch (err) {
           setError("Failed to load available exams.");
@@ -28,28 +27,62 @@ const AvailableExams = () => {
       }
     };
     fetchExams();
-  }, []);
+  }, [currentUser]);
 
   const handleEnroll = async (examId) => {
     try {
-      const result = await examService.enrollInExam(examId);
-      if (result.enrolled) {
+      console.log("Enrolling in exam with ID:", typeof examId);
+      setLoading(true);
+      const response = await examService.enrollInExam(examId);
+
+      // Check the response status from the controller
+      if (response.status === "failed") {
+        // Check specific error conditions
+        if (response.active === false) {
+          toast.error(
+            response.message ||
+              "Enrollment period has ended or exam is not active."
+          );
+        } else {
+          toast.error(response.message || "Failed to enroll in exam.");
+        }
+      } else if (response.enrolled) {
         toast.info("You are already enrolled in this exam.");
-      } else {
+      } else if (response.status === "success") {
+        // Remove the enrolled exam from the available exams list
         setExams(exams.filter((exam) => exam._id !== examId));
-        toast.success("You are enrolled in the exam!");
+        if (onEnrollSuccess) {
+          onEnrollSuccess();
+        }
+        toast.success("Successfully enrolled in exam!");
       }
     } catch (err) {
       console.error("Error enrolling in exam:", err);
-      setError("Failed to enroll in exam.");
-      toast.error("Enrollment failed. Please try again.");
+
+      // More specific error handling based on status codes
+      if (err.response?.status === 404) {
+        toast.error("Exam not found.");
+      } else if (err.response?.status === 400) {
+        toast.error(
+          err.response.data?.message || "Invalid enrollment request."
+        );
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
     } finally {
-      setError(null);
+      setLoading(false);
     }
   };
 
-  if (loading) return <p>Loading available exams...</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <p className="ml-2">Loading...</p>
+      </div>
+    );
   if (error) return <p className="text-red-600">{error}</p>;
+
   return (
     <div>
       <ToastContainer

@@ -4,60 +4,72 @@ import React from "react";
 const ExamDetailsModal = ({ isOpen, onClose, exam }) => {
   if (!isOpen || !exam) return null;
 
+  // Render a modal dialog that shows exam details
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300">
-      <div className="bg-white/95 p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 hover:scale-[1.02]">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
-          {exam.title}
+    // Modal backdrop - covers the entire screen with a semi-transparent background
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+      {/* Modal content container */}
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        {/* Exam title */}
+        <h2 className="text-xl font-bold mb-4 text-gray-800">
+          {exam.title
+            .split(" ")
+            .map(
+              (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ")}
         </h2>
 
-        <div className="space-y-4">
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Description</span>
-            <span className="text-gray-800">{exam.description}</span>
+        {/* Main content area */}
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Description section */}
+          <div className="bg-gray-100 p-4 rounded">
+            <h3 className="font-medium mb-2">About this exam</h3>
+            <p>{exam.description}</p>
           </div>
 
+          {/* Basic exam information */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Duration</span>
-              <span className="text-gray-800 font-medium">
-                {exam.duration} mins
-              </span>
+            {/* Duration info */}
+            <div className="bg-blue-100 p-4 rounded">
+              <h3 className="font-medium">Duration</h3>
+              <p>{exam.duration} minutes</p>
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Total Marks</span>
-              <span className="text-gray-800 font-medium">
-                {exam.totalMarks}
-              </span>
+            {/* Total marks info */}
+            <div className="bg-green-100 p-4 rounded">
+              <h3 className="font-medium">Total Marks</h3>
+              <p>{exam.totalMarks} Marks</p>
             </div>
+          </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Start Time</span>
-              <span className="text-gray-800">
-                {new Date(exam.startTime).toLocaleString()}
-              </span>
+          {/* Exam schedule section */}
+          <div className="bg-purple-100 p-4 rounded">
+            <h3 className="font-medium mb-2">Exam Schedule</h3>
+            {/* Start time */}
+            <div className="mb-2">
+              <p className="font-medium">Starts:</p>
+              <p>{new Date(exam.startTime).toLocaleString()}</p>
             </div>
+            {/* End time */}
+            <div>
+              <p className="font-medium">Ends:</p>
+              <p>{new Date(exam.endTime).toLocaleString()}</p>
+            </div>
+          </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">End Time</span>
-              <span className="text-gray-800">
-                {new Date(exam.endTime).toLocaleString()}
-              </span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Passing Marks</span>
-              <span className="text-gray-800 font-medium">
-                {exam.passingMarks}
-              </span>
-            </div>
+          {/* Passing score section */}
+          <div className="bg-yellow-100 p-4 rounded">
+            <h3 className="font-medium ">Passing Score</h3>
+            <p className="text-red-500">*{exam.passingMarks} marks required</p>
           </div>
         </div>
 
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="mt-8 w-full px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 active:bg-gray-900 transition-colors duration-200 font-medium"
+          className="mt-4 w-full p-2 bg-orange-500 text-white rounded hover:bg-orange-600"
         >
           Close
         </button>

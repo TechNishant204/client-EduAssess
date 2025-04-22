@@ -1,148 +1,276 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ExamProvider } from "./contexts/ExamContext";
-import Home from "./pages/HomePage";
-import Login from "./Components/auth/Login";
-import Signup from "./Components/auth/Signup";
-import ForgotPassword from "./Components/auth/ForgotPassword";
-import ResetPassword from "./Components/auth/ResetPassword";
-import ProfilePage from "./pages/ProfilePage";
-import ResultPage from "./pages/ResultPage";
-import ExamPage from "./pages/ExamPage";
-import StartExamPage from "./Components/exam/StartExamPage";
-import Result from "./Components/exam/Result";
+import Navbar from "./Components/common/Navbar";
 import ProtectedRoute from "./Components/common/ProtectedRoute";
 import MainLayout from "./layout/MainLayout";
-import AdminDashboard from "./components/dashboard/AdminDashboard";
-import StudentDashboard from "./components/dashboard/StudentDashboard";
-import Navbar from "./Components/common/Navbar";
+
+// Lazy load components
+const Home = React.lazy(() => import("./pages/HomePage"));
+const Login = React.lazy(() => import("./Components/auth/Login"));
+const Signup = React.lazy(() => import("./Components/auth/Signup"));
+import NotFound from "./Components/common/NotFound";
+const ForgotPassword = React.lazy(() =>
+  import("./Components/auth/ForgotPassword")
+);
+const ResetPassword = React.lazy(() =>
+  import("./Components/auth/ResetPassword")
+);
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
+const ResultPage = React.lazy(() => import("./pages/ResultPage"));
+const ExamPage = React.lazy(() => import("./pages/ExamPage"));
+const StartExamPage = React.lazy(() =>
+  import("./Components/exam/StartExamPage")
+);
+const Result = React.lazy(() => import("./Components/exam/Result"));
+const AdminDashboard = React.lazy(() =>
+  import("./components/dashboard/AdminDashboard")
+);
+const StudentDashboard = React.lazy(() =>
+  import("./components/dashboard/StudentDashboard")
+);
+const ExamQuestionsPage = React.lazy(() => import("./pages/ExamQuestionPage"));
+const ShowQuestionPage = React.lazy(() => import("./pages/ShowQuestionPage"));
+
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mr-2"></div>
+    <p className="text-lg font-medium">Loading...</p>
+  </div>
+);
 
 // Public Layout with Navbar
 const PublicLayout = ({ children }) => {
   return (
     <>
       <Navbar />
-      {children}
+      <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
     </>
   );
 };
+
+// Public routes definition
+const publicRoutes = [
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+    authCheck: true, // Will be checked for auth redirection
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+    authCheck: true, // Will be checked for auth redirection
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password/:token",
+    element: <ResetPassword />,
+  },
+];
+
+// Student routes definition
+const studentRoutes = [
+  {
+    path: "/student/dashboard",
+    element: <StudentDashboard />,
+  },
+  {
+    path: "/student/start-exam/:examId",
+    element: <StartExamPage />,
+  },
+  {
+    path: "/student/exam/:examId",
+    element: <ExamPage />,
+  },
+  {
+    path: "/student/results",
+    element: <ResultPage />,
+    children: [
+      {
+        path: ":resultId",
+        element: <Result />,
+      },
+    ],
+  },
+];
+
+// Admin routes definition
+const adminRoutes = [
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboard />,
+  },
+  {
+    path: "/admin/exams/:examId/questions",
+    element: <ExamQuestionsPage />,
+  },
+  {
+    path: "/admin/exams/:examId/show-questions",
+    element: <ShowQuestionPage />,
+  },
+];
+
+// Shared routes accessible by both admin and student
+const sharedRoutes = [
+  {
+    path: "/profile",
+    element: <ProfilePage />,
+  },
+];
 
 // Custom component to handle initial auth check and role-based redirection
 const AppContent = () => {
   const { currentUser, loading } = useAuth();
 
   if (loading) {
-    return <p className="text-center align-items-center">Loading...</p>;
+    return <LoadingFallback />;
   }
+
+  // Function to render public routes
+  const renderPublicRoutes = () => {
+    return publicRoutes.map((route) => {
+      // For routes that need auth checking
+      if (route.authCheck) {
+        return (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              !currentUser ? (
+                <PublicLayout>{route.element}</PublicLayout>
+              ) : currentUser.role === "admin" ? (
+                <Navigate to="/admin/dashboard" replace />
+              ) : (
+                <Navigate to="/student/dashboard" replace />
+              )
+            }
+          />
+        );
+      }
+
+      // For standard public routes
+      return (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={<PublicLayout>{route.element}</PublicLayout>}
+        />
+      );
+    });
+  };
+
+  // Function to render student routes
+  const renderStudentRoutes = () => {
+    return studentRoutes.map((route) => {
+      if (route.children) {
+        return (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <ProtectedRoute roles={["student"]}>
+                <Suspense fallback={<LoadingFallback />}>
+                  {route.element}
+                </Suspense>
+              </ProtectedRoute>
+            }
+          >
+            {route.children.map((childRoute) => (
+              <Route
+                key={childRoute.path}
+                path={childRoute.path}
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    {childRoute.element}
+                  </Suspense>
+                }
+              />
+            ))}
+          </Route>
+        );
+      }
+
+      return (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={
+            <ProtectedRoute roles={["student"]}>
+              <Suspense fallback={<LoadingFallback />}>
+                {route.element}
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+      );
+    });
+  };
+
+  // Function to render admin routes
+  const renderAdminRoutes = () => {
+    return adminRoutes.map((route) => (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <Suspense fallback={<LoadingFallback />}>{route.element}</Suspense>
+          </ProtectedRoute>
+        }
+      />
+    ));
+  };
+
+  // Function to render shared routes
+  const renderSharedRoutes = () => {
+    return sharedRoutes.map((route) => (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          <ProtectedRoute roles={["student", "admin"]}>
+            <Suspense fallback={<LoadingFallback />}>{route.element}</Suspense>
+          </ProtectedRoute>
+        }
+      />
+    ));
+  };
 
   return (
     <Routes>
-      {/* Public Routes with Navbar */}
-      <Route
-        path="/login"
-        element={
-          !currentUser ? (
-            <PublicLayout>
-              <Login />
-            </PublicLayout>
-          ) : currentUser.role === "admin" ? (
-            <Navigate to="/admin/dashboard" replace />
-          ) : (
-            <Navigate to="/student/dashboard" replace />
-          )
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          !currentUser ? (
-            <PublicLayout>
-              <Signup />
-            </PublicLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          <PublicLayout>
-            <ForgotPassword />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/reset-password/:token"
-        element={
-          <PublicLayout>
-            <ResetPassword />
-          </PublicLayout>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <PublicLayout>
-            <Home />
-          </PublicLayout>
-        }
-      />
+      {/* Public Routes */}
+      {renderPublicRoutes()}
 
-      {/* Protected Routes with MainLayout */}
+      {/* Protected Routes inside MainLayout */}
       <Route element={<MainLayout />}>
-        <Route
-          path="/student/dashboard"
-          element={
-            <ProtectedRoute roles={["student"]}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute roles={["student", "admin"]}>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/start-exam/:examId"
-          element={
-            <ProtectedRoute roles={["student"]}>
-              <StartExamPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/exam/:examId"
-          element={
-            <ProtectedRoute roles={["student"]}>
-              <ExamPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/results"
-          element={
-            <ProtectedRoute roles={["student"]}>
-              <ResultPage />
-            </ProtectedRoute>
-          }
-        >
-          <Route path=":resultId" element={<Result />} />
-        </Route>
+        {/* Student Routes */}
+        {renderStudentRoutes()}
+
+        {/* Admin Routes */}
+        {renderAdminRoutes()}
+
+        {/* Shared Routes */}
+        {renderSharedRoutes()}
       </Route>
+
+      {/* Catch-all route for 404 - Updated to use NotFound component */}
+      <Route
+        path="*"
+        element={
+          <PublicLayout>
+            <NotFound />
+          </PublicLayout>
+        }
+      />
     </Routes>
   );
 };

@@ -1,17 +1,23 @@
 // src/components/dashboard/StudentDashboard.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AvailableExams from "./AvailableExams";
 import EnrolledExams from "./EnrolledExams";
 import CompletedExams from "./CompletedExams";
 import { useAuth } from "../../hooks/useAuth";
 
 const StudentDashboard = () => {
+  const [refreshEnrolledExams, setRefreshEnrolledExams] = useState(false);
   const { currentUser } = useAuth();
-  console.log("Student Dashboard Page Rendered");
+  // console.log("Student Dashboard Page Rendered");
+
   console.log("Current User:", currentUser);
   useEffect(() => {
     document.title = "Student Dashboard | EduAssess";
   }, []);
+
+  const handleRefreshEnrolledExams = () => {
+    setRefreshEnrolledExams((prev) => !prev); // Toggle state to trigger refresh
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -25,10 +31,10 @@ const StudentDashboard = () => {
         {currentUser && (
           <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-1">
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-              <AvailableExams />
+              <AvailableExams onEnrollSuccess={handleRefreshEnrolledExams} />
             </div>
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-              <EnrolledExams />
+              <EnrolledExams refreshTrigger={refreshEnrolledExams} />
             </div>
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
               <CompletedExams />

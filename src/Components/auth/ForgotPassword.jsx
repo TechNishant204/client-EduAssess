@@ -2,8 +2,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/images/logo1.png";
-import { FaLock, FaEnvelope, FaPaperPlane } from "react-icons/fa";
+import { FaEnvelope, FaPaperPlane } from "react-icons/fa";
 import { authService } from "../../services/auth";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { FiArrowLeft } from "react-icons/fi";
+import { FaCheckCircle } from "react-icons/fa";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +14,7 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -28,7 +32,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       setError("");
-      await authService.forgotPassword(email);
+      await authService.forgotPassword(email); // API CALL
       setSuccess(true);
     } catch (err) {
       setError(err.message || "Failed to send reset email. Please try again.");
@@ -38,38 +42,24 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/">
-          <img className="mx-auto h-8 w-auto" src={Logo} alt="EduAssess" />
-        </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:mx-3 lg:mx-auto sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-5/12 sm:max-w-md px-8 pt-4 pb-8 rounded-xl bg-orange-600 text-white">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
           Forgot Password
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-slate-100">
           Enter your email address and we'll send you a link to reset your
           password.
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {error && (
             <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <HiOutlineExclamationCircle className="h-5 w-5 text-red-400" />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{error}</p>
@@ -82,18 +72,7 @@ const ForgotPassword = () => {
             <div className="bg-green-50 border-l-4 border-green-400 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-green-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <FaCheckCircle className="h-5 w-5 text-green-400" />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-green-700">
@@ -143,17 +122,18 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <FaPaperPlane className="me-2" />
                   {loading ? "Sending..." : "Send Reset Link"}
                 </button>
               </div>
 
-              <div className="text-center">
+              <div className="flex items-center justify-center space-x-1">
+                <FiArrowLeft className="h-5 w-5 font-medium text-gray-500" />
                 <Link
                   to="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-orange-600 hover:text-orange-800"
                 >
                   Back to Login
                 </Link>

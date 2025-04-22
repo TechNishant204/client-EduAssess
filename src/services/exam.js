@@ -1,105 +1,270 @@
 import api from "./api";
 
 export const examService = {
+  // ============= ADMIN EXAM FUNCTIONS =============
+
+  // Create a new exam (admin only)
   createExam: async (examData) => {
-    const response = await api.post("/exam/createExam", examData);
-    console.log("Create exam response:", response.data);
-    return response.data;
-  },
-  deleteExam: async (examId) => {
-    const response = await api.delete(`/exam/${examId}`);
-    console.log("Create exam response:", response.data);
-    return response.data;
-  },
-  updateExam: async (id, data) => {
-    const response = await api.put(`/exam/${id}`, examData);
-    console.log("Update exam response:", response.data);
-    return response.data;
-  },
-  updateExam: async (id, data) => {
-    const response = await api.put(`/exam/${id}`, data);
-    return response.data;
-  },
-
-  getAvailableExams: async () => {
-    const response = await api.get("/exam/available");
-    console.log("Available exams response:", response.data);
-    return response.data;
-  },
-
-  getEnrolledExams: async () => {
-    const response = await api.get("/exam/enrolled");
-    console.log("Enrolled exams response:", response.data);
-    return response.data;
-  },
-
-  getCompletedExams: async () => {
-    const response = await api.get("/exam/completed");
-    console.log("Completed exams response:", response);
-    return response.data;
-  },
-
-  enrollInExam: async (examId) => {
-    const response = await api.post(`/exam/${examId}/enroll`);
-    console.log("Enroll in exam response:", response.data);
-    return response.data;
-  },
-
-  startExam: async (examId) => {
     try {
-      const response = await api.post(`/exam/${examId}/start`);
-      console.log("Start exam raw response:", response);
-      console.log("Start exam data:", response.data);
-      return response;
+      const response = await api.post("/exam/admin/exams", examData);
+      return response.data;
     } catch (error) {
-      console.error("Error starting exam:", error);
-      throw error;
+      console.error("Error creating exam:", error);
+      throw error.response?.data || { message: "Failed to create exam" };
     }
   },
+
+  // Get all exams (admin only)
+  getAllExams: async (showAll = false) => {
+    try {
+      const response = await api.get(
+        `/exam/admin/exams${showAll ? "?showAll=true" : ""}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching all exams:", error);
+      throw error.response?.data || { message: "Failed to fetch exams" };
+    }
+  },
+
+  // Get exams created by current admin (admin only)
+  getMyExams: async () => {
+    try {
+      const response = await api.get("/exam/admin/my-exams");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching my exams:", error);
+      throw error.response?.data || { message: "Failed to fetch your exams" };
+    }
+  },
+
+  // Delete an exam (admin only)
+  deleteExam: async (examId) => {
+    try {
+      const response = await api.delete(`/exam/admin/exams/${examId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to delete exam" };
+    }
+  },
+
+  // Update an exam (admin only)
+  updateExam: async (examId, examData) => {
+    try {
+      const response = await api.put(`/exam/admin/exams/${examId}`, examData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to update exam" };
+    }
+  },
+
+  // Get exam analytics (admin only)
   getExamAnalytics: async (examId) => {
-    const response = await api.get(`/exam/analytics/${examId}`);
-    console.log("Exam analytics response:", response.data);
-    return response.data;
+    try {
+      const response = await api.get(`/exam/admin/analytics/${examId}`); // Include examId in the URL
+      // console.log("examId of analytics", typeof examId); // Debugging line
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      throw (
+        error.response?.data || { message: "Failed to fetch exam analytics" }
+      );
+    }
   },
-  // fetch result
-  submitExam: async (examId, answers, proctorFlags) => {
-    const response = await api.post(`/result/`, {
-      examId,
-      answers,
-      proctorFlags,
-    });
-    console.log("Submit exam response:", response.data);
-    return response.data;
+
+  // ============= STUDENT EXAM FUNCTIONS =============
+
+  // Get available exams (student only)
+  getAvailableExams: async () => {
+    try {
+      const response = await api.get("/exam/available");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching available exams:", error);
+      throw (
+        error.response?.data || { message: "Failed to fetch available exams" }
+      );
+    }
   },
-  // fetch result
-  getExamResult: async (examId) => {
-    const response = await api.get(`/exam/${examId}/result`);
-    console.log("Exam result response:", response.data);
-    return response.data;
+
+  // Get enrolled exams (student only)
+  getEnrolledExams: async () => {
+    try {
+      const response = await api.get("/exam/enrolled");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching enrolled exams:", error);
+      throw (
+        error.response?.data || { message: "Failed to fetch enrolled exams" }
+      );
+    }
   },
-  getAllExams: async () => {
-    const response = await api.get(`/exam/all`);
-    console.log("All exams response:", response.data);
-    return response.data;
+
+  // Get completed exams (student only)
+  getCompletedExams: async () => {
+    try {
+      const response = await api.get("/exam/completed");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching completed exams:", error);
+      throw (
+        error.response?.data || { message: "Failed to fetch completed exams" }
+      );
+    }
   },
+
+  // Enroll in an exam (student only)
+  enrollInExam: async (examId) => {
+    try {
+      const response = await api.post(`/exam/enroll/${examId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error enrolling in exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to enroll in exam" };
+    }
+  },
+
+  // Start an exam (student only)
+  startExam: async (examId) => {
+    try {
+      // console.log("Starting exam with ID:", typeof examId); // Debugging line
+      const response = await api.get(`/exam/start/${examId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error starting exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to start exam" };
+    }
+  },
+
+  // ============= COMMON EXAM FUNCTIONS =============
+
+  // Get exam by ID (admin specific route)
+  getExamById: async (examId) => {
+    try {
+      const response = await api.get(`/exam/admin/exams/${examId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to fetch exam details" };
+    }
+  },
+
+  // ============= QUESTION ROUTES =============
+  // Note: These remain unchanged as question routes weren't provided in the router file
+
+  // Get all questions for an exam
   getQuestionsByExamId: async (examId) => {
-    const response = await api.get(`/question/${examId}`);
-    console.log("Questions by exam ID response:", response.data);
-    return response.data;
+    try {
+      const response = await api.get(`/question/exam/${examId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching questions for exam ${examId}:`, error);
+      throw (
+        error.response?.data || { message: "Failed to fetch exam questions" }
+      );
+    }
   },
-  getQuestionByQuestionId: async (quesId) => {
-    const response = await api.get(`/question/${quesId}`);
-    console.log("Questions by question ID response:", response.data);
-    return response.data;
+
+  // Get question by ID
+  getQuestionById: async (questionId) => {
+    try {
+      const response = await api.get(`/question/${questionId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching question ${questionId}:`, error);
+      throw (
+        error.response?.data || { message: "Failed to fetch question details" }
+      );
+    }
   },
-  deleteQuestion: async (quesId) => {
-    const response = await api.delete(`/question/${quesId}`);
-    console.log("delete exam response:", response.data);
-    return response.data;
+
+  // Delete a question (admin only)
+  deleteQuestion: async (questionId) => {
+    try {
+      const response = await api.delete(`/question/${questionId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting question ${questionId}:`, error);
+      throw error.response?.data || { message: "Failed to delete question" };
+    }
   },
-  createQuestion: async (examData) => {
-    const response = await api.post("api/question/", examData);
-    console.log("Create question response:", response.data);
-    return response.data;
+
+  // Create a new question (admin only)
+  createQuestion: async (questionData) => {
+    try {
+      const response = await api.post("/question", questionData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating question:", error);
+      throw error.response?.data || { message: "Failed to create question" };
+    }
   },
+
+  // Add multiple questions to an exam (admin only)
+  addQuestionsToExam: async (examId, questionData) => {
+    try {
+      const response = await api.post(`/question/exam/${examId}`, questionData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error adding questions to exam ${examId}:`, error);
+      throw (
+        error.response?.data || { message: "Failed to add questions to exam" }
+      );
+    }
+  },
+
+  // Update a question (admin only)
+  updateQuestion: async (questionId, questionData) => {
+    try {
+      const response = await api.put(`/question/${questionId}`, questionData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating question ${questionId}:`, error);
+      throw error.response?.data || { message: "Failed to update question" };
+    }
+  },
+
+  // ============= RESULT ROUTES =============
+
+  // Submit an exam (student only)
+  submitExam: async (examId, answers, proctorFlags, startTime) => {
+    try {
+      // Format the request data according to the backend
+      const requestData = {
+        examId,
+        answers: answers.map((answer) => ({
+          question: answer.question,
+          selectedOption: answer.selectedOption,
+        })),
+        startTime: startTime || new Date().toISOString(),
+        proctorFlags: proctorFlags || [],
+      };
+
+      const response = await api.post("/result", requestData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error submitting exam ${examId}:`, error);
+      throw error.response?.data || { message: "Failed to submit exam" };
+    }
+  },
+};
+
+// Export utility function to handle API errors in components
+export const handleApiError = (
+  error,
+  fallbackMessage = "An error occurred"
+) => {
+  if (error.response) {
+    // request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    return error.response.data?.message || fallbackMessage;
+  } else if (error.request) {
+    // The request was made but no response was received
+    return "No response from server. Please check your internet connection.";
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    return error.message || fallbackMessage;
+  }
 };

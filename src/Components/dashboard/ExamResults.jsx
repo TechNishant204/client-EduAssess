@@ -1,68 +1,144 @@
 import React from "react";
-
-const ExamResults = ({ loading, results }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b">
-        <h2 className="text-xl font-semibold text-gray-800">Results</h2>
+import { HiOutlineDocumentText } from "react-icons/hi";
+export default function ExamResultsPage({ results, loading }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <p className="ml-2">Loading results...</p>
       </div>
-      <div className="p-6">
-        {loading ? (
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-          </div>
-        ) : results.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No results available for this exam yet.
-          </div>
-        ) : (
-          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            {results.map((result) => (
-              <div
-                key={result._id}
-                className="border rounded-lg p-4 hover:bg-gray-50"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {result.student?.name || "Unknown Student"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {result.student?.email || ""}
-                    </p>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-800">Exam Results</h2>
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+            {results?.length || 0} submissions
+          </span>
+        </div>
+      </div>
+
+      {!results || results.length === 0 ? (
+        <div className="text-center py-12">
+          <HiOutlineDocumentText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No exam results available yet.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-200">
+          {results.map((result) => (
+            <div
+              key={result._id}
+              className="p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center">
+                  <div className="bg-orange-100 text-orange-800 w-8 h-8 rounded-full flex items-center justify-center font-medium mr-2">
+                    {result.student?.name.charAt(0).toUpperCase()}
                   </div>
-                  <div
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      result.isPassed
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {result.isPassed ? "PASSED" : "FAILED"}
+                  <div>
+                    <h3 className="font-medium text-gray-800">
+                      {result.student?.name}
+                    </h3>
+                    <p className="text-gray-500 text-xs">
+                      {result.student?.email}
+                    </p>
                   </div>
                 </div>
-                <div className="mt-2 flex items-center">
-                  <div className="flex-1">
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div
-                        className={`h-2 rounded-full ${
-                          result.isPassed ? "bg-green-500" : "bg-red-500"
-                        }`}
-                        style={{ width: `${result.percentage || 0}%` }}
-                      ></div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <p className="text-gray-500 text-xs mb-1">Submitted</p>
+                    <div className="text-right">
+                      <p className="text-sm font-medium leading-tight">
+                        {formatDateShort(result.submittedAt)}
+                      </p>
+                      <p className="text-xs text-gray-500 leading-tight">
+                        {formatTime(result.submittedAt)}
+                      </p>
                     </div>
                   </div>
-                  <span className="ml-2 text-sm font-medium text-gray-700">
-                    {result.totalScore || 0} pts ({result.percentage || 0}%)
-                  </span>
+                  <StatusBadge isPassed={result.isPassed} />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              <div className="mt-6 grid grid-cols-3 gap-4">
+                <ScoreCard
+                  label="Total Score"
+                  value={`${result.totalScore} points`}
+                />
+                <ScoreCard
+                  label="Percentage"
+                  value={`${Math.round(result.percentage)}%`}
+                  bgColor={getPercentageColor(result.percentage)}
+                />
+                <ScoreCard
+                  label="Result"
+                  value={result.isPassed ? "Passed" : "Failed"}
+                  textColor={
+                    result.isPassed ? "text-green-600" : "text-red-600"
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const StatusBadge = ({ isPassed }) => {
+  return (
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${
+        isPassed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+      }`}
+    >
+      {isPassed ? "PASSED" : "FAILED"}
+    </span>
+  );
+};
+
+const ScoreCard = ({
+  label,
+  value,
+  bgColor = "bg-gray-100",
+  textColor = "text-gray-800",
+}) => {
+  return (
+    <div className={`${bgColor} rounded-lg p-3 text-center`}>
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className={`font-semibold ${textColor}`}>{value}</p>
     </div>
   );
 };
 
-export default ExamResults;
+// Helper function to get color based on percentage
+const getPercentageColor = (percentage) => {
+  if (percentage >= 80) return "bg-green-100";
+  if (percentage >= 60) return "bg-blue-100";
+  if (percentage >= 40) return "bg-yellow-100";
+  return "bg-red-100";
+};
+
+// Helper function to format date in "Apr 22, 2025" format
+const formatDateShort = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+// Helper function to format time in "12:34 AM" format
+const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};

@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { examService } from "../../services/exam";
 import { resultService } from "../../services/resultService";
 import ExamTable from "../../Components/dashboard/ExamTable";
 import ExamAnalytics from "../../Components/dashboard/ExamAnalytics";
 import ExamResults from "../../Components/dashboard/ExamResults";
 import ExamFormModal from "./ExamFormModal";
-import QuestionFormModal from "./QuestionFormModal";
 import ExamDetailsModal from "../../Components/dashboard/ExamDetailsModal";
 import { toast } from "react-toastify";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [exams, setExams] = useState([]);
   const [results, setResults] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [selectedExam, setSelectedExam] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [showExamModal, setShowExamModal] = useState(false);
-  const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [detailsExam, setDetailsExam] = useState(null);
   const [editExam, setEditExam] = useState(null);
-  const [newExamId, setNewExamId] = useState(null);
 
   // Load exams on component mount
   useEffect(() => {
@@ -31,10 +32,9 @@ const AdminDashboard = () => {
   async function loadExams() {
     try {
       setLoading(true);
-      const response = await examService.getAllExams();
-      console.log("All exams response:", response);
+      // Changed to getMyExams to only fetch exams created by current admin
+      const response = await examService.getMyExams();
 
-      // Fix: Check for response.data directly
       if (response && response.data) {
         setExams(response.data);
       } else {
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
   const refreshExams = async () => {
     try {
       setLoading(true);
-      const response = await examService.getAllExams();
+      const response = await examService.getMyExams();
       if (response && response.data) {
         setExams(response.data);
       }
@@ -64,99 +64,121 @@ const AdminDashboard = () => {
     }
   };
 
+  // When admin clicks on create exam
   const handleCreateExam = async (examId) => {
     try {
-      setNewExamId(examId);
-      setShowExamModal(false);
-      setShowQuestionModal(true);
       await refreshExams();
-      toast.success("Exam created successfully!");
+      setShowExamModal(false);
+
+      // Navigate to the questions page
+      navigate(`/admin/exams/${examId}/questions`);
+      toast.success("Exam created successfully! Now add questions.");
     } catch (err) {
       toast.error("Failed to create exam");
     }
   };
 
+  // When admin clicks edit button for updating an exam
   const handleUpdateExam = async (id, data) => {
     try {
       await examService.updateExam(id, data);
       await refreshExams();
+
       setShowExamModal(false);
-      setEditExam(null);
-      toast.success("Exam updated successfully!");
+      navigate(`/admin/exams/${id}/questions`);
+      toast.success("Exam updated successfully! Now you can edit questions.");
     } catch (err) {
       toast.error("Failed to update exam");
+      setEditExam(null);
     }
   };
 
+  // When admin clicks on delete exam
   const handleDeleteExam = async (id) => {
     if (!window.confirm("Are you sure you want to delete this exam?")) return;
 
     try {
       await examService.deleteExam(id);
       setExams((prevExams) => prevExams.filter((exam) => exam._id !== id));
+
+      // Reset selected exam if it was the deleted one
       if (selectedExam === id) {
         setSelectedExam(null);
+        setAnalytics(null);
+        setResults([]);
       }
+
       toast.success("Exam deleted successfully!");
     } catch (err) {
+      console.error("Error deleting exam:", err);
       toast.error("Failed to delete exam");
     }
   };
 
-  const handleCreateQuestion = async () => {
-    try {
-      await refreshExams();
-      setShowQuestionModal(false);
-      setNewExamId(null);
-      toast.success("Question added successfully!");
-    } catch (err) {
-      toast.error("Failed to add question");
-    }
-  };
-
+  // When admin clicks to view exam details and analytics
   const handleViewDetails = async (examId) => {
-    console.log("Attempting to view details for examId:", examId);
+    if (!examId) {
+      toast.error("Cannot view details: Invalid exam ID");
+      return;
+    }
+
     try {
-      setLoading(true);
+      setResultsLoading(true);
+      setAnalyticsLoading(true);
       setSelectedExam(examId);
 
-      const [resultResponse, analyticsResponse] = await Promise.all([
-        resultService.getAllResultsByExamId(examId),
-        examService.getExamAnalytics(examId),
-      ]);
-
-      if (resultResponse && resultResponse.data) {
-        setResults(resultResponse.data);
-      } else {
+      // Fetch results
+      try {
+        const resultResponse = await resultService.getAllResultsByExamId(
+          examId
+        );
+        setResults(resultResponse?.data || []);
+      } catch (resultError) {
+        console.error("Failed to load exam results:", resultError);
+        toast.error("Failed to load exam results");
         setResults([]);
+      } finally {
+        setResultsLoading(false);
       }
 
-      if (analyticsResponse && analyticsResponse.data) {
-        setAnalytics(analyticsResponse.data);
-      } else {
+      // Fetch analytics
+      try {
+        const analyticsResponse = await examService.getExamAnalytics(examId);
+        setAnalytics(analyticsResponse?.data || null);
+      } catch (analyticsError) {
+        console.error("Failed to load exam analytics:", analyticsError);
+        toast.error("Failed to load exam analytics");
         setAnalytics(null);
+      } finally {
+        setAnalyticsLoading(false);
       }
     } catch (err) {
-      console.error("Failed to load exam details:", err);
+      console.error("General error in handleViewDetails:", err);
       toast.error("Failed to load exam details");
-      setResults([]);
-      setAnalytics(null);
-    } finally {
-      setLoading(false);
     }
   };
 
+  // When user clicks on an exam row to show details modal
   const handleRowClick = (exam) => {
     setDetailsExam(exam);
     setShowDetailsModal(true);
   };
 
+  // When admin clicks to edit questions
+  const handleEditQuestions = (examId) => {
+    navigate(`/admin/exams/${examId}/questions`);
+  };
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage exams and view analytics</p>
+    <div className="p-2 md:p-6 bg-gray-50 min-h-screen ">
+      <div className="max-w-7xl mx-4 md:mx-auto">
+        <header className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Manage your exams and view analytics
+          </p>
         </header>
 
         {/* Exam Table Section */}
@@ -171,6 +193,7 @@ const AdminDashboard = () => {
             setEditExam(exam);
             setShowExamModal(true);
           }}
+          onEditQuestions={handleEditQuestions}
           onDeleteExam={handleDeleteExam}
           onViewDetails={handleViewDetails}
           onRowClick={handleRowClick}
@@ -178,43 +201,43 @@ const AdminDashboard = () => {
 
         {/* Selected Exam Details */}
         {selectedExam && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            {/* Exam Info Card */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden md:col-span-3">
-              <div className="px-6 py-4 border-b">
+          <>
+            {/* Exam Summary Card */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-8 mb-6">
+              <div className="px-3 md:px-6 py-4 border-b">
                 <h2 className="text-xl font-semibold text-gray-800">
                   {exams.find((e) => e._id === selectedExam)?.title ||
                     "Exam Details"}
                 </h2>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 md:p-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-blue-50 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-blue-800 mb-2">
+                    <h3 className="text-xs font-medium text-blue-800 uppercase mb-1">
                       Duration
                     </h3>
-                    <p className="text-2xl font-bold text-blue-700">
+                    <p className="text-xl md:text-2xl font-bold text-blue-700">
                       {exams.find((e) => e._id === selectedExam)?.duration || 0}{" "}
                       mins
                     </p>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-green-800 mb-2">
+                  <div className="bg-green-50 rounded-lg p-4 col-span-2 md:col-span-1">
+                    <h3 className="text-xs font-medium text-green-800 uppercase mb-1">
                       Start Time
                     </h3>
-                    <p className="text-lg font-semibold text-green-700">
+                    <p className="text-sm md:text-base font-medium text-green-700">
                       {exams.find((e) => e._id === selectedExam)?.startTime
                         ? new Date(
                             exams.find((e) => e._id === selectedExam)?.startTime
                           ).toLocaleString()
-                        : "N/A"}
+                        : "Not scheduled"}
                     </p>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-purple-800 mb-2">
+                    <h3 className="text-xs font-medium text-purple-800 uppercase mb-1">
                       Questions
                     </h3>
-                    <p className="text-2xl font-bold text-purple-700">
+                    <p className="text-xl md:text-2xl font-bold text-purple-700">
                       {exams.find((e) => e._id === selectedExam)?.questions
                         ?.length || 0}
                     </p>
@@ -223,12 +246,15 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Analytics Section */}
-            <ExamAnalytics loading={loading} analytics={analytics} />
+            {/* Results and Analytics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Analytics Section */}
+              <ExamAnalytics loading={analyticsLoading} analytics={analytics} />
 
-            {/* Results Section */}
-            <ExamResults loading={loading} results={results} />
-          </div>
+              {/* Results Section */}
+              <ExamResults loading={resultsLoading} results={results} />
+            </div>
+          </>
         )}
       </div>
 
@@ -241,15 +267,6 @@ const AdminDashboard = () => {
         }}
         onNext={editExam ? handleUpdateExam : handleCreateExam}
         initialData={editExam}
-      />
-      <QuestionFormModal
-        isOpen={showQuestionModal}
-        onClose={() => {
-          setShowQuestionModal(false);
-          setNewExamId(null);
-        }}
-        onFinish={handleCreateQuestion}
-        examId={newExamId || selectedExam}
       />
       <ExamDetailsModal
         isOpen={showDetailsModal}

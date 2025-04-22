@@ -2,16 +2,20 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../Components/common/Navbar";
-import Footer from "../Components/common/Footer";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 const MainLayout = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  console.log("MainLayout Rendered"); // Debugging line
-  console.log("Current User:", currentUser); // Debugging line
+  // console.log("MainLayout Rendered"); // Debugging line
+  // console.log("Current User from main layout:", currentUser); // Debugging line
   const handleLogout = () => {
     logout();
+    toast("Logged out successfully", {
+      type: "success",
+    });
     navigate("/login");
   };
 

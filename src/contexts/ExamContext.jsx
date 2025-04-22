@@ -4,56 +4,71 @@ import { examService } from "../services/exam";
 const ExamContext = createContext();
 
 export const ExamProvider = ({ children }) => {
-  const [exam, setExam] = useState(null); // Change exams to exam (singular)
+  const [exam, setExam] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
 
+  // Start exam function
   const startExam = async (examId) => {
-    console.log("startExam called with examId:", examId);
     try {
       const response = await examService.startExam(examId);
-      console.log("Exam data:", response.data);
 
-      // Properly set the exam data
+      // Set exam data
       setExam(response.data);
 
-      // Check where questions are in the response structure
+      // Set questions if available, otherwise fetch them separately
       if (response.data.questions && Array.isArray(response.data.questions)) {
         setQuestions(response.data.questions);
-        console.log("Questions set:", response.data.questions);
       } else {
-        // If questions aren't directly in the response, fetch them separately
-        const questionsData = await examService.getQuestionsByExamId(examId);
+        const questionsData = await examService.getQuestionsByExamId(examId); // API CALL
         setQuestions(questionsData.questions || []);
-        console.log("Questions fetched separately:", questionsData.questions);
       }
 
-      // Set time limit from the response or use default
-      const examDuration = response.data.duration || 20 * 60; // Duration in seconds
+      // Set time limit
+      const examDuration = response.data.duration * 60 || 1200; // Convert to seconds
       setTimeLeft(examDuration);
-      console.log("Time left set to:", examDuration);
 
-      // Return the data so we can check it in ExamInterface
-      return response.data;
+      return response;
     } catch (error) {
-      console.error("Error in startExam:", error);
+      console.error("Error starting exam:", error);
       throw error;
     }
   };
 
-  const submitExam = async (examId) => {
-    await examService.submitExam(examId, Object.values(answers), []);
-    setExam(null);
-    setQuestions([]);
-    setAnswers({});
-    setTimeLeft(0);
+  // Submit exam function
+  const submitExam = async (
+    examId,
+    formattedAnswers,
+
+    startTime
+  ) => {
+    try {
+      // Call the API with properly formatted data
+      const result = await examService.submitExam(
+        examId,
+        formattedAnswers,
+
+        startTime
+      );
+
+      // Reset all exam state
+      setExam(null);
+      setQuestions([]);
+      setAnswers({});
+      setTimeLeft(0);
+
+      return result;
+    } catch (error) {
+      console.error("Error submitting exam:", error);
+      throw error;
+    }
   };
 
   return (
     <ExamContext.Provider
       value={{
-        exam, // Changed from exams to exam
+        exam,
         questions,
         answers,
         setAnswers,

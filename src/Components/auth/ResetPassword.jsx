@@ -4,7 +4,11 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth";
 import Logo from "../../assets/images/logo1.png";
 import { FaLock, FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { AiOutlineLoading } from "react-icons/ai";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { FiArrowLeft } from "react-icons/fi";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -24,7 +28,7 @@ const ResetPassword = () => {
       try {
         setValidating(true);
         const result = await authService.verifyResetToken(token);
-        console.log("Token validation result inside resetPassword:", result);
+        // console.log("Token validation result inside resetPassword:", result);
         setTokenValid(result.valid);
       } catch (err) {
         toast.error("Invalid or expired reset token");
@@ -60,7 +64,9 @@ const ResetPassword = () => {
       setError("");
       await authService.resetPassword(token, password);
       setSuccess(true);
-      toast.success("Password reset successful! Redirecting to login page...");
+      toast.success(
+        "Password reset Successfully! Redirecting to login page..."
+      );
       setTimeout(() => {
         toast.info("You can now log in with your new password.");
       }, 3000);
@@ -84,31 +90,13 @@ const ResetPassword = () => {
   if (validating) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <ToastContainer position="top-right" autoClose={5000} />
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Reset Password
           </h2>
           <div className="mt-8 flex justify-center">
-            <svg
-              className="animate-spin h-8 w-8 text-blue-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
+            <AiOutlineLoading className="animate-spin h-8 w-8 text-orange-600" />
           </div>
           <p className="mt-4 text-center text-sm text-gray-600">
             Validating your reset token...
@@ -122,9 +110,6 @@ const ResetPassword = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <Link to="/">
-            <img className="mx-auto h-12 w-auto" src={Logo} alt="EduAssess" />
-          </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Reset Password
           </h2>
@@ -133,18 +118,7 @@ const ResetPassword = () => {
               <div className="bg-red-50 border-l-4 border-red-400 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg
-                      className="h-5 w-5 text-red-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <HiOutlineExclamationCircle className="h-5 w-5 text-red-400" />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-red-700">
@@ -175,14 +149,11 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/">
-          <img className="mx-auto h-8 w-auto" src={Logo} alt="EduAssess" />
-        </Link>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md bg-orange-600 text-white rounded-lg p-2 md:p-4">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Reset Password
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-slate-100">
           Please enter your new password
         </p>
       </div>
@@ -193,18 +164,7 @@ const ResetPassword = () => {
             <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <HiOutlineExclamationCircle className="h-5 w-5 text-red-400" />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{error}</p>
@@ -297,10 +257,11 @@ const ResetPassword = () => {
                 </button>
               </div>
 
-              <div className="text-center">
+              <div className="flex items-center justify-center space-x-1">
+                <FiArrowLeft className="h-5 w-5 font-medium text-gray-500" />
                 <Link
                   to="/login"
-                  className="font-medium text-orange-600 hover:text-orange-500"
+                  className="font-medium text-orange-600 hover:text-orange-800"
                 >
                   Back to Login
                 </Link>

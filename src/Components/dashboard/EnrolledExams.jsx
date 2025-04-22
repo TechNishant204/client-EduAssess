@@ -1,45 +1,64 @@
-// src/components/dashboard/EnrolledExams.jsx
 import React, { useState, useEffect } from "react";
 import { examService } from "../../services/exam";
 import { useAuth } from "../../hooks/useAuth";
-import ExamDetailsModal from "./ExamDetailsModal";
-import { Link } from "react-router-dom";
+import ExamDetailsModal from "../../Components/dashboard/ExamDetailsModal";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { HiOutlineClock } from "react-icons/hi";
 
-const EnrolledExams = () => {
+const EnrolledExams = ({ refreshTrigger }) => {
   const { currentUser } = useAuth();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedExam, setSelectedExam] = useState(null);
-
-  console.log("Enrolled Exams Rendered");
-  console.log("currentUser", currentUser);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchExams = async () => {
+    const fetchEnrolledExams = async () => {
       if (currentUser?.id) {
-        console.log("Fetching enrolled exams for user:", currentUser._id);
         try {
           setLoading(true);
           const response = await examService.getEnrolledExams(currentUser._id);
-          console.log("Enrolled exams response:", response);
           setExams(response.data || []);
         } catch (err) {
-          console.error("Error fetching enrolled exams:", err);
           setError("Failed to load enrolled exams.");
         } finally {
           setLoading(false);
         }
       }
     };
-    fetchExams();
-  }, []);
+    fetchEnrolledExams();
+  }, [currentUser, refreshTrigger]);
 
-  if (loading) return <p>Loading enrolled exams...</p>;
+  const handleStartExam = async (examId) => {
+    try {
+      console.log("Starting exam with ID:", examId); // Add this log to verify the examId
+      const response = await examService.startExam(examId); // Call the start exam API
+      const { alreadyGiven } = response.data;
+
+      if (alreadyGiven) {
+        toast.info("You Have Already Taken The Assessment.");
+      } else {
+        navigate(`/student/start-exam/${examId}`);
+      }
+    } catch (error) {
+      console.error("Error starting exam:", error); // Log the error for debugging
+      toast.error("Failed to start the exam. Please try again.");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <p className="ml-3">Loading enrolled exams...</p>
+      </div>
+    );
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
-    <div className="p-6">
+    <div className="p-1 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
         Enrolled Exams
       </h2>
@@ -58,35 +77,39 @@ const EnrolledExams = () => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
                   {exam.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4 flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  {new Date(exam.startTime).toLocaleString()}
-                </p>
+                <div className="text-gray-600 text-sm mb-4 space-y-1">
+                  <p className="flex items-center">
+                    <HiOutlineClock className="w-4 h-4 mr-2" />
+                    <span className="font-medium">Date : </span>{" "}
+                    {new Date(exam.startTime).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                  <p className="flex items-center ml-6">
+                    <span className="font-medium">Time : </span>{" "}
+                    {new Date(exam.startTime).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
+                </div>
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setSelectedExam(exam)}
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 text-sm font-medium"
+                    className="flex-1 px-4 py-2  bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 text-sm font-medium"
                   >
                     View Details
                   </button>
-                  <Link
-                    to={`/student/start-exam/${exam._id}`}
-                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm font-medium text-center"
+                  <button
+                    onClick={() => handleStartExam(exam._id)}
+                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm font-medium"
                   >
                     Start Exam
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>

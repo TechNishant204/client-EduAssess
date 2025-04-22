@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
+import { FiCheckCircle } from "react-icons/fi";
 import Footer from "../Components/common/Footer";
 import pic from "../assets/images/home.svg";
 const HomePage = () => {
@@ -12,10 +12,10 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-10">
-                <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-orange-500 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-orange-500 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text">
                   Transform Your Skills into Success
                 </h1>
-                <p className="text-lg md:text-xl text-blue-950 max-w-lg">
+                <p className="text-md md:text-lg text-blue-950 max-w-lg">
                   Experience next-gen assessment technology that adapts to your
                   journey. Smart. Seamless. Future-ready.
                 </p>
@@ -30,15 +30,15 @@ const HomePage = () => {
                     to="/login"
                     className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-medium rounded-full border-2 border-orange-500 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-orange-50"
                   >
-                    Enter Platform
+                    Join US
                   </Link>
                 </div>
               </div>
               <div className="relative">
                 <img
-                  src={pic} // Replace with the correct path to the uploaded illustration
+                  src={pic}
                   alt="Online Assessment Illustration"
-                  className="w-full h-auto rounded-xl  transform hover:scale-105 transition duration-500"
+                  className="w-full h-auto rounded-full transform hover:scale-125 border-0 shadow-md hover:shadow-lg transition-all duration-300"
                 />
               </div>
             </div>
@@ -61,20 +61,7 @@ const HomePage = () => {
               {/* Feature 1 */}
               <div className="bg-gray-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
                 <div className="flex items-center justify-center h-14 w-14 rounded-full bg-orange-500 text-white">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <FiCheckCircle className="h-6 w-6" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">
                   Prepare an assessment
@@ -149,7 +136,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-        {/* CTA Section */}
+        {/* Display Section */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-700 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white">

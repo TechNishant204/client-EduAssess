@@ -63,8 +63,12 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
       } else {
         // Create new exam
         response = await examService.createExam(formData);
-        const newExam = response.data;
-        onNext(newExam._id);
+        if (response.data && response.data._id) {
+          // Ensure we're passing the new exam ID to the parent component
+          onNext(response.data._id);
+        } else {
+          throw new Error("Failed to get exam ID from response");
+        }
       }
     } catch (err) {
       console.error("Error submitting exam form:", err);
@@ -208,7 +212,7 @@ const ExamFormModal = ({ isOpen, onClose, onNext, initialData }) => {
               disabled={loading}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
             >
-              {loading ? "Processing..." : initialData ? "Update" : "Next"}
+              {loading ? "Processing..." : "Next"}
             </button>
           </div>
         </form>

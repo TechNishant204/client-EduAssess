@@ -1,7 +1,6 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect } from "react";
 import api from "../services/api";
-
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -41,6 +40,7 @@ export const AuthProvider = ({ children }) => {
       if (response.data.status !== "success") {
         throw new Error("Login failed: " + response.data.message);
       }
+
       const { token, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
@@ -53,7 +53,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     // Remove auth header
     delete api.defaults.headers.Authorization;
     setCurrentUser(null);
@@ -61,11 +60,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post("/api/auth/register", userData);
+      const response = await api.post("/auth/register", userData);
 
       if (response.data.status === "success") {
         // Note: Your register endpoint doesn't return a token,
         // so the user would need to log in after registration
+
         return response.data.data;
       } else {
         throw new Error(response.data.message || "Registration failed");

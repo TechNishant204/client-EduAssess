@@ -1,5 +1,7 @@
-import React from "react";
-
+import React, { useState } from "react";
+import { examService } from "../../services/exam";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 const ExamTable = ({
   exams,
   loading,
@@ -9,6 +11,25 @@ const ExamTable = ({
   onViewDetails,
   onRowClick,
 }) => {
+  const [questions, setQuestions] = useState([]);
+  const [selectedExamId, setSelectedExamId] = useState(null);
+
+  const navigate = useNavigate(); // Initialize navigate
+
+  // Fetch questions for a specific exam
+  const handleViewQuestions = async (examId) => {
+    try {
+      setSelectedExamId(examId);
+      const questionsData = await examService.getQuestionsByExamId(examId);
+      setQuestions(questionsData);
+      toast.success(`Fetched ${questionsData.length} questions for the exam.`);
+      navigate(`/admin/exams/${examId}/questions`);
+    } catch (error) {
+      toast.error("Failed to fetch questions for the exam.");
+      console.error("Error fetching questions in the exam table:", error);
+    }
+  };
+
   // Format date string for display
   const formatDate = (dateString) => {
     try {
@@ -52,7 +73,7 @@ const ExamTable = ({
 
       {loading ? (
         <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
         </div>
       ) : exams.length === 0 ? (
         <div className="p-8 text-center">
@@ -106,7 +127,14 @@ const ExamTable = ({
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="font-medium text-gray-900">
-                      {exam.title || "Untitled"}
+                      {exam.title
+                        .split(" ")
+                        .map(
+                          (word) =>
+                            word.charAt(0).toUpperCase() +
+                            word.slice(1).toLowerCase()
+                        )
+                        .join(" ") || "Untitled"}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -126,7 +154,7 @@ const ExamTable = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div
-                      className="flex space-x-2"
+                      className="flex space-x-3"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
@@ -138,7 +166,7 @@ const ExamTable = ({
                       </button>
                       <button
                         onClick={() => onEditExam(exam)}
-                        className="text-yellow-600 hover:text-yellow-900"
+                        className="text-yellow-600 hover:text-yellow-800"
                         disabled={loading}
                       >
                         Edit
@@ -149,6 +177,13 @@ const ExamTable = ({
                         disabled={loading}
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={() => handleViewQuestions(exam._id)}
+                        className="text-green-600 hover:text-green-900"
+                        disabled={loading}
+                      >
+                        Questions
                       </button>
                     </div>
                   </td>

@@ -9,13 +9,13 @@ const Footer = () => {
           &copy; {new Date().getFullYear()} EduAssess . All rights reserved.
         </p>
         <div className="mt-2">
-          <a href="/about" className="text-gray-400 hover:text-white mx-2">
+          <a href="*" className="text-gray-400 hover:text-white mx-2">
             About
           </a>
-          <a href="/contact" className="text-gray-400 hover:text-white mx-2">
+          <a href="*" className="text-gray-400 hover:text-white mx-2">
             Contact
           </a>
-          <a href="/privacy" className="text-gray-400 hover:text-white mx-2">
+          <a href="*" className="text-gray-400 hover:text-white mx-2">
             Privacy Policy
           </a>
         </div>
