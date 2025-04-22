@@ -1,8 +1,8 @@
 // src/pages/DashboardPage.jsx
 import React, { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import StudentDashboard from "../components/dashboard/StudentDashboard";
-import AdminDashboard from "../components/dashboard/AdminDashboard";
+import StudentDashboard from "../Components/dashboard/StudentDashboard";
+import AdminDashboard from "../Components/dashboard/AdminDashboard";
 
 const DashboardPage = () => {
   const { currentUser } = useContext(AuthContext);

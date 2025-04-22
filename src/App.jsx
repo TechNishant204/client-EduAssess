@@ -25,10 +25,10 @@ const StartExamPage = React.lazy(() =>
 );
 const Result = React.lazy(() => import("./Components/exam/Result"));
 const AdminDashboard = React.lazy(() =>
-  import("./components/dashboard/AdminDashboard")
+  import("./Components/dashboard/AdminDashboard")
 );
 const StudentDashboard = React.lazy(() =>
-  import("./components/dashboard/StudentDashboard")
+  import("./Components/dashboard/StudentDashboard")
 );
 const ExamQuestionsPage = React.lazy(() => import("./pages/ExamQuestionPage"));
 const ShowQuestionPage = React.lazy(() => import("./pages/ShowQuestionPage"));
