@@ -28,7 +28,7 @@ const HomePage = () => {
                   </Link>
                   <Link
                     to="/login"
-                    className="inline-flex w-1/3 mx-auto items-center justify-center px-6 sm:px-4 py-3 sm:py-1 bg-white text-orange-600 font-medium rounded-full border-2 border-orange-500 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-orange-50 text-md sm:text-sm"
+                    className="inline-flex w-1/3 mx-auto items-center justify-center px-4 sm:px-2 py-3 sm:py-1 bg-white text-orange-600 font-medium rounded-full border-2 border-orange-500 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-orange-50 text-sm sm:text-base"
                   >
                     Join US
                   </Link>
