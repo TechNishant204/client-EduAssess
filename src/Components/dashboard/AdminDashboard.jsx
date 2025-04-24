@@ -170,13 +170,13 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-2 md:p-6 bg-gray-50 min-h-screen ">
-      <div className="max-w-7xl mx-4 md:mx-auto">
-        <header className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+    <div className="p-2 md:p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-2 md:mx-auto">
+        <header className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-800">
             Admin Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             Manage your exams and view analytics
           </p>
         </header>
@@ -203,29 +203,29 @@ const AdminDashboard = () => {
         {selectedExam && (
           <>
             {/* Exam Summary Card */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-8 mb-6">
-              <div className="px-3 md:px-6 py-4 border-b">
-                <h2 className="text-xl font-semibold text-gray-800">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-6 md:mt-8 mb-4 md:mb-6">
+              <div className="px-3 md:px-6 py-3 md:py-4 border-b">
+                <h2 className="text-lg md:text-xl font-semibold text-gray-800">
                   {exams.find((e) => e._id === selectedExam)?.title ||
                     "Exam Details"}
                 </h2>
               </div>
-              <div className="p-4 md:p-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
+              <div className="p-3 md:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                  <div className="bg-blue-50 rounded-lg p-3 md:p-4">
                     <h3 className="text-xs font-medium text-blue-800 uppercase mb-1">
                       Duration
                     </h3>
-                    <p className="text-xl md:text-2xl font-bold text-blue-700">
+                    <p className="text-lg md:text-2xl font-bold text-blue-700">
                       {exams.find((e) => e._id === selectedExam)?.duration || 0}{" "}
                       mins
                     </p>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-4 col-span-2 md:col-span-1">
+                  <div className="bg-green-50 rounded-lg p-3 md:p-4">
                     <h3 className="text-xs font-medium text-green-800 uppercase mb-1">
                       Start Time
                     </h3>
-                    <p className="text-sm md:text-base font-medium text-green-700">
+                    <p className="text-xs md:text-base font-medium text-green-700 break-words">
                       {exams.find((e) => e._id === selectedExam)?.startTime
                         ? new Date(
                             exams.find((e) => e._id === selectedExam)?.startTime
@@ -233,11 +233,11 @@ const AdminDashboard = () => {
                         : "Not scheduled"}
                     </p>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="bg-purple-50 rounded-lg p-3 md:p-4 sm:col-span-2 md:col-span-1">
                     <h3 className="text-xs font-medium text-purple-800 uppercase mb-1">
                       Questions
                     </h3>
-                    <p className="text-xl md:text-2xl font-bold text-purple-700">
+                    <p className="text-lg md:text-2xl font-bold text-purple-700">
                       {exams.find((e) => e._id === selectedExam)?.questions
                         ?.length || 0}
                     </p>
@@ -247,7 +247,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Results and Analytics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* Analytics Section */}
               <ExamAnalytics loading={analyticsLoading} analytics={analytics} />
 

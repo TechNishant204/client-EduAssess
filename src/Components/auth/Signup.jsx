@@ -30,7 +30,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, socialLogin } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -52,8 +52,11 @@ const Signup = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long";
+    } else {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9])(?=.*[a-z]).{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+      newErrors.password = "Password must contain at least 8 characters, one uppercase letter, one number, and one special character";
+      }
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -63,12 +66,13 @@ const Signup = () => {
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone Number is required";
     } else if (!/^\d{10}$/.test(formData.phone.replace(/[^0-9]/g, ""))) {
+      //  using a regular expression to sanitize a phone number input by removing all non-numeric characters
       newErrors.phone = "Phone Number is invalid";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+    };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
